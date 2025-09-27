@@ -358,32 +358,77 @@ class ApiService {
    * Create a new will
    * POST /create
    */
+  // async createWill(willData: CreateWillRequest): Promise<WillResponse> {
+  //   try {
+  //     console.log("📦 Will payload being sent to backend:", willData);
+
+  //     const response = await this.makeRequest<WillResponse>('/will/create', {
+  //       method: 'POST',
+  //       body: JSON.stringify(willData),
+  //     })
+
+  //     return {
+  //       success: true,
+  //       willIndex: response.willIndex || response.id || 0,
+  //       contractAddress: response.contractAddress || '',
+  //       transactionHash: response.transactionHash || response.txHash || '',
+  //       status: response.status || 'active',
+  //       message: response.message || 'Will created successfully',
+  //       ...response
+  //     }
+  //   } catch (error) {
+  //     console.error('Create will error:', error)
+  //     return {
+  //       success: false,
+  //       message: error instanceof Error ? error.message : 'Failed to create will'
+  //     }
+  //   }
+  // }
   async createWill(willData: CreateWillRequest): Promise<WillResponse> {
-    try {
-      console.log("📦 Will payload being sent to backend:", willData);
+  try {
+    console.log("📦 Will payload being sent to backend:", willData);
 
-      const response = await this.makeRequest<WillResponse>('/will/create', {
-        method: 'POST',
-        body: JSON.stringify(willData),
-      })
+    const response = await this.makeRequest<any>('/will/create', {
+      method: 'POST',
+      body: JSON.stringify(willData),
+    });
 
-      return {
-        success: true,
-        willIndex: response.willIndex || response.id || 0,
-        contractAddress: response.contractAddress || '',
-        transactionHash: response.transactionHash || response.txHash || '',
-        status: response.status || 'active',
-        message: response.message || 'Will created successfully',
-        ...response
-      }
-    } catch (error) {
-      console.error('Create will error:', error)
+    console.log("📨 Backend response:", response);
+
+    // Extract the correct fields from backend response
+    const transactionHash = response.transactionDigest || response.transactionHash || '';
+    const willIndex = response.willIndex || 0;
+    
+    if (!transactionHash) {
+      console.error("❌ No transaction hash received from backend");
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to create will'
-      }
+        message: 'Transaction failed: no transaction hash received'
+      };
     }
-  }
+
+    if (willIndex === null || willIndex === undefined) {
+      console.warn("⚠ Will index not found in response");
+    }
+
+    return {
+      success: true,
+      willIndex: willIndex,
+      transactionHash: transactionHash,
+      contractAddress: response.contractAddress || '', // Optional field
+      status: 'active', // Default status since backend doesn't provide
+      message: response.message || 'Will created successfully',
+      // Include the full backend response for debugging
+      backendResponse: response
+    };
+  } catch (error) {
+    console.error('Create will error:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to create will'
+    };
+  }
+}
 
   /**
    * Update activity for a specific will
