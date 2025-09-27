@@ -30,6 +30,20 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+// Define the expected structure of willsState for clarity
+interface Will {
+  willIndex: number;
+  heirs?: { length: number };
+  createdAt?: number;
+  status: string;
+}
+
+interface WillsState {
+  data?: Will[];
+  loading: boolean;
+  error?: string;
+}
+
 const MainDashboard = () => {
   const { userId, logout } = useAuth()
   const { address, balance, isConnected, isLoadingBalance } = useWallet()
@@ -66,38 +80,38 @@ const MainDashboard = () => {
   ]
 
   const statsData = [
-    { 
-      title: "Total Assets", 
-      value: isLoadingBalance ? "Loading..." : `$${(parseFloat(balance) * 2).toLocaleString()}`, 
-      icon: DollarSign, 
-      change: isLoadingBalance ? "Fetching..." : "+12%", 
+    {
+      title: "Total Assets",
+      value: isLoadingBalance ? "Loading..." : `$${(parseFloat(balance) * 2).toLocaleString()}`,
+      icon: DollarSign,
+      change: isLoadingBalance ? "Fetching..." : "+12%",
       trend: "up",
       color: "bg-blue-500",
-      loading: isLoadingBalance
+      loading: isLoadingBalance,
     },
-    { 
-      title: "Will Status", 
-      value: willsState.data?.length > 0 ? "Active" : "Not Created", 
-      icon: Shield, 
-      change: willsState.data?.length > 0 ? "Secured" : "Create Now", 
+    {
+      title: "Will Status",
+      value: willsState.data && willsState.data.length > 0 ? "Active" : "Not Created",
+      icon: Shield,
+      change: willsState.data && willsState.data.length > 0 ? "Secured" : "Create Now",
       trend: "neutral",
-      color: "bg-green-500"
+      color: "bg-green-500",
     },
-    { 
-      title: "Beneficiaries", 
-      value: willsState.data?.reduce((sum, w) => sum + w.heirs?.length || 0, 0) || "0", 
-      icon: Users, 
-      change: "Verified", 
+    {
+      title: "Beneficiaries",
+      value: willsState.data ? willsState.data.reduce((sum, w) => sum + (w.heirs?.length || 0), 0).toString() : "0",
+      icon: Users,
+      change: "Verified",
       trend: "up",
-      color: "bg-purple-500"
+      color: "bg-purple-500",
     },
-    { 
-      title: "AI Assistance", 
-      value: "Available", 
-      icon: Bot, 
-      change: "Get Help", 
+    {
+      title: "AI Assistance",
+      value: "Available",
+      icon: Bot,
+      change: "Get Help",
       trend: "neutral",
-      color: "bg-indigo-500"
+      color: "bg-indigo-500",
     },
   ]
 
@@ -107,21 +121,21 @@ const MainDashboard = () => {
       description: "Set up your digital asset distribution",
       icon: FileText,
       href: "/create",
-      color: "from-blue-500 to-purple-600"
+      color: "from-blue-500 to-purple-600",
     },
     {
       title: "Add Beneficiaries",
       description: "Manage who inherits your assets",
       icon: Users,
       href: "/beneficiaries",
-      color: "from-green-500 to-teal-600"
+      color: "from-green-500 to-teal-600",
     },
     {
       title: "AI Assistant",
       description: "Get help with will creation",
       icon: Bot,
       href: "/ai-assistant",
-      color: "from-purple-500 to-pink-600"
+      color: "from-purple-500 to-pink-600",
     },
   ]
 
@@ -216,7 +230,7 @@ const MainDashboard = () => {
                   </div>
                   <div className="hidden md:block text-left">
                     <p className="text-sm font-medium text-foreground">{userId}</p>
-                    <p className="text-xs text-muted-foreground">{address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'No wallet'}</p>
+                    <p className="text-xs text-muted-foreground">{address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "No wallet"}</p>
                   </div>
                   <ChevronDown className="w-4 h-4 text-muted-foreground" />
                 </button>
@@ -227,7 +241,7 @@ const MainDashboard = () => {
                       <Settings className="inline w-4 h-4 mr-2" />
                       Settings
                     </button>
-                    <button 
+                    <button
                       onClick={logout}
                       className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
                     >
@@ -248,14 +262,11 @@ const MainDashboard = () => {
             <h1 className="text-2xl font-bold mb-2">Welcome to AjogunNet</h1>
             <p className="text-white/80 mb-4">Secure your digital legacy with blockchain technology</p>
             <div className="flex space-x-3">
-              <Button 
-                asChild
-                className="bg-white/10 hover:bg-white/20 text-white border-0 backdrop-blur-sm"
-              >
+              <Button asChild className="bg-white/10 hover:bg-white/20 text-white border-0 backdrop-blur-sm">
                 <Link href="/create">Create Your Will</Link>
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="bg-transparent border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
               >
                 Learn More
@@ -278,7 +289,7 @@ const MainDashboard = () => {
                         )}
                       </div>
                     </div>
-                    <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center ${stat.loading ? 'animate-pulse' : ''}`}>
+                    <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center ${stat.loading ? "animate-pulse" : ""}`}>
                       <stat.icon className="w-6 h-6 text-white" />
                     </div>
                   </div>
@@ -345,12 +356,7 @@ const MainDashboard = () => {
                   <div className="text-center space-y-2">
                     <p className="font-medium text-foreground">Failed to load wills</p>
                     <p className="text-sm text-muted-foreground">{willsState.error}</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => fetchWills()}
-                      className="mt-2"
-                    >
+                    <Button variant="outline" size="sm" onClick={() => fetchWills()} className="mt-2">
                       Try Again
                     </Button>
                   </div>
@@ -368,16 +374,19 @@ const MainDashboard = () => {
                           <div>
                             <p className="font-medium text-foreground">Will #{will.willIndex}</p>
                             <p className="text-sm text-muted-foreground">
-                              {will.heirs?.length || 0} beneficiaries • Created {new Date(will.createdAt || Date.now()).toLocaleDateString()}
+                              {will.heirs?.length || 0} beneficiaries • Created{" "}
+                              {new Date(will.createdAt || Date.now()).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            will.status === 'active' 
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              will.status === "active"
+                                ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                                : "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
+                            }`}
+                          >
                             {will.status}
                           </span>
                           <Button variant="ghost" size="sm">

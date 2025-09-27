@@ -16,6 +16,9 @@ import {
   MessageCircle,
 } from "lucide-react"
 
+// Define the enhancement type
+type EnhancementType = "polish" | "simplify" | "formal" | "heartfelt";
+
 const MessageComposer = () => {
   const [selectedBeneficiary, setSelectedBeneficiary] = useState("")
   const [originalMessage, setOriginalMessage] = useState("")
@@ -32,28 +35,28 @@ const MessageComposer = () => {
 
   const enhancementOptions = [
     {
-      id: "polish",
+      id: "polish" as EnhancementType,
       label: "Polish",
       description: "Improve grammar and flow",
       icon: Sparkles,
       color: "bg-purple-100 text-purple-600 hover:bg-purple-200",
     },
     {
-      id: "simplify",
+      id: "simplify" as EnhancementType,
       label: "Simplify",
       description: "Make more conversational",
       icon: MessageCircle,
       color: "bg-blue-100 text-blue-600 hover:bg-blue-200",
     },
     {
-      id: "formal",
+      id: "formal" as EnhancementType,
       label: "Make Formal",
       description: "Add professional tone",
       icon: FileText,
       color: "bg-gray-100 text-gray-600 hover:bg-gray-200",
     },
     {
-      id: "heartfelt",
+      id: "heartfelt" as EnhancementType,
       label: "Add Warmth",
       description: "Make more emotional",
       icon: Heart,
@@ -72,7 +75,7 @@ const MessageComposer = () => {
       "Dear [Name],\n\nThank you for all the joy and love you've brought into my life. This inheritance is a small token of my appreciation...",
   }
 
-  const handleEnhancement = async (type) => {
+  const handleEnhancement = async (type: EnhancementType) => {
     if (!originalMessage.trim()) return
 
     setIsEnhancing(true)
@@ -103,7 +106,7 @@ const MessageComposer = () => {
     }, 1500)
   }
 
-  const handleTemplateSelect = (template) => {
+  const handleTemplateSelect = (template: keyof typeof messageTemplates) => {
     setOriginalMessage(messageTemplates[template])
     setMessageType(template)
   }
@@ -163,10 +166,10 @@ const MessageComposer = () => {
             <div className="bg-white rounded-xl p-6 border border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Templates</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {Object.entries(messageTemplates).map(([key, template]) => (
+                {Object.entries(messageTemplates).map(([key, _]) => (
                   <button
                     key={key}
-                    onClick={() => handleTemplateSelect(key)}
+                    onClick={() => handleTemplateSelect(key as keyof typeof messageTemplates)}
                     className={`p-3 text-center border-2 rounded-xl transition-all capitalize ${
                       messageType === key
                         ? "border-indigo-500 bg-indigo-50 text-indigo-700"
