@@ -44,17 +44,23 @@ const ModernWalletDashboard = () => {
   const [profileOpen, setProfileOpen] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [hasFetchedBalance, setHasFetchedBalance] = useState(false) // Track initial fetch
 
-  // Auto-refresh balance when userId is available
+  // Auto-refresh balance only once on mount
   useEffect(() => {
-    if (userId && isConnected) {
-      console.log("🏦 Triggering balance refresh for userId:", userId)
-      refreshBalance(userId).catch((err) => {
-        console.error("🏦 Error in balance refresh:", err)
-        setErrorMessage("Failed to fetch balance. Please try again.");
-      })
+    if (userId && isConnected && !hasFetchedBalance) {
+      console.log("🏦 Triggering initial balance refresh for userId:", userId)
+      refreshBalance(userId)
+        .then(() => {
+          setHasFetchedBalance(true) // Mark as fetched
+        })
+        .catch((err) => {
+          console.error("🏦 Error in initial balance refresh:", err)
+          setErrorMessage("Failed to fetch balance. Please try again.")
+          setHasFetchedBalance(true) // Mark as fetched even on error to prevent retries
+        })
     }
-  }, [userId, isConnected, refreshBalance])
+  }, [userId, isConnected, refreshBalance, hasFetchedBalance])
 
   const sidebarLinks = [
     { name: "Dashboard", icon: Home, href: "/dashboard", active: false },
@@ -257,7 +263,7 @@ const ModernWalletDashboard = () => {
                       <Settings className="inline w-4 h-4 mr-2" />
                       Settings
                     </button>
-                    <button 
+                    <button
                       onClick={logout}
                       className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
                     >
@@ -269,8 +275,8 @@ const ModernWalletDashboard = () => {
               </div>
 
               <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing || isLoadingBalance}>
-                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing || isLoadingBalance ? 'animate-spin' : ''}`} />
-                {isRefreshing || isLoadingBalance ? 'Refreshing...' : 'Refresh'}
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing || isLoadingBalance ? "animate-spin" : ""}`} />
+                {isRefreshing || isLoadingBalance ? "Refreshing..." : "Refresh"}
               </Button>
             </div>
           </div>
@@ -310,7 +316,7 @@ const ModernWalletDashboard = () => {
           <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl p-6 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-5 rounded-full -mr-16 -mt-16"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white bg-opacity-5 rounded-full -ml-12 -mb-12"></div>
-            
+
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-white">Total Balance</h2>
@@ -348,7 +354,7 @@ const ModernWalletDashboard = () => {
               </div>
 
               <div className="flex space-x-3">
-                <Button 
+                <Button
                   onClick={() => setIsTransferModalOpen(true)}
                   className="bg-white/10 hover:bg-white/20 text-white border-0 backdrop-blur-sm transition-all duration-200"
                   disabled={!isConnected}
@@ -356,7 +362,7 @@ const ModernWalletDashboard = () => {
                   <Send className="w-4 h-4 mr-2" />
                   Send
                 </Button>
-                <Button 
+                <Button
                   className="bg-white/10 hover:bg-white/20 text-white border-0 backdrop-blur-sm transition-all duration-200"
                   disabled={!isConnected}
                 >
@@ -478,9 +484,7 @@ const ModernWalletDashboard = () => {
                     </div>
                     <div className="text-right">
                       <p
-                        className={`font-semibold ${
-                          tx.type === "receive" ? "text-green-600" : "text-foreground"
-                        }`}
+                        className={`font-semibold ${tx.type === "receive" ? "text-green-600" : "text-foreground"}`}
                       >
                         {tx.type === "receive" ? "+" : "-"}
                         {formatNumber(tx.amount)} {tx.token}
@@ -504,10 +508,15 @@ const ModernWalletDashboard = () => {
         onClose={() => setIsTransferModalOpen(false)}
         onSuccess={() => {
           if (userId) {
-            refreshBalance(userId).catch((err) => {
-              console.error("🏦 Error refreshing balance after transfer:", err)
-              setErrorMessage("Failed to refresh balance after transfer. Please try again.")
-            })
+            refreshBalance(userId)
+              .then(() => {
+                setErrorMessage(null)
+                setHasFetchedBalance(true) // Update flag after transfer
+              })
+              .catch((err) => {
+                console.error("🏦 Error refreshing balance after transfer:", err)
+                setErrorMessage("Failed to refresh balance after transfer. Please try again.")
+              })
           }
         }}
       />

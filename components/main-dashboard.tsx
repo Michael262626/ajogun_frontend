@@ -30,26 +30,26 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
-// Define the expected structure of willsState for clarity
 interface Will {
-  willIndex: number;
-  heirs?: { length: number };
-  createdAt?: number;
-  status: string;
+  willIndex: number
+  heirs?: { length: number }
+  createdAt?: number
+  status: string
 }
 
 interface WillsState {
-  data?: Will[];
-  loading: boolean;
-  error?: string;
+  data?: Will[]
+  loading: boolean
+  error?: string
 }
 
 const MainDashboard = () => {
   const { userId, logout } = useAuth()
-  const { address, balance, isConnected, isLoadingBalance } = useWallet()
+  const { address, balance, isConnected, isLoadingBalance, refreshBalance } = useWallet()
   const { fetchWills, willsState } = useApi()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     if (address) {
@@ -70,6 +70,24 @@ const MainDashboard = () => {
     return () => clearInterval(interval)
   }, [address, fetchWills])
 
+  // Fetch balance once on mount
+  useEffect(() => {
+    if (userId && isConnected) {
+      console.log("🏠 Triggering balance refresh for userId:", userId)
+      refreshBalance(userId).catch((err) => {
+        console.error("🏠 Error in balance refresh:", err)
+        setErrorMessage("Failed to fetch balance. Please try again.")
+      })
+    }
+  }, [userId, isConnected, refreshBalance])
+
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num)
+  }
+
   const sidebarLinks = [
     { name: "Dashboard", icon: Home, href: "/dashboard", active: true },
     { name: "Create Will", icon: FileText, href: "/create" },
@@ -79,13 +97,20 @@ const MainDashboard = () => {
     { name: "AI Assistant", icon: Bot, href: "/ai-assistant" },
   ]
 
+  const suiBalance = parseFloat(balance) / 1000000000 || 0
+  console.log("🏠 Dashboard - Raw balance:", balance, "Parsed SUI balance:", suiBalance)
+
   const statsData = [
     {
       title: "Total Assets",
-      value: isLoadingBalance ? "Loading..." : `$${(parseFloat(balance) * 2).toLocaleString()}`,
+      value: isLoadingBalance
+        ? "Loading..."
+        : errorMessage
+        ? "Error"
+        : `$${formatNumber(suiBalance * 2)}`,
       icon: DollarSign,
-      change: isLoadingBalance ? "Fetching..." : "+12%",
-      trend: "up",
+      change: isLoadingBalance ? "Fetching..." : errorMessage ? "Error" : "+12%",
+      trend: isLoadingBalance || errorMessage ? "neutral" : "up",
       color: "bg-blue-500",
       loading: isLoadingBalance,
     },
@@ -141,6 +166,19 @@ const MainDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <div className="w-5 h-5 text-red-600">⚠️</div>
+            <div>
+              <h3 className="font-medium text-red-800 dark:text-red-200">Error</h3>
+              <p className="text-sm text-red-700 dark:text-red-300">{errorMessage}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
@@ -183,7 +221,6 @@ const MainDashboard = () => {
           ))}
         </nav>
 
-        {/* Help Card */}
         <div className="absolute bottom-4 left-4 right-4">
           <div className="bg-gradient-to-r from-primary to-blue-600 rounded-xl p-4 text-white">
             <h3 className="font-semibold text-sm">Need Help?</h3>
@@ -294,8 +331,8 @@ const MainDashboard = () => {
                     </div>
                   </div>
                   <div className="flex items-center mt-4">
-                    {stat.trend === "up" && !stat.loading && <TrendingUp className="w-4 h-4 text-green-500 mr-1" />}
-                    <span className={`text-sm ${stat.trend === "up" && !stat.loading ? "text-green-600" : "text-muted-foreground"}`}>
+                    {stat.trend === "up" && !stat.loading && !errorMessage && <TrendingUp className="w-4 h-4 text-green-500 mr-1" />}
+                    <span className={`text-sm ${stat.trend === "up" && !stat.loading && !errorMessage ? "text-green-600" : "text-muted-foreground"}`}>
                       {stat.change}
                     </span>
                   </div>
@@ -336,7 +373,6 @@ const MainDashboard = () => {
             </CardHeader>
             <CardContent>
               {willsState.loading ? (
-                /* Loading State */
                 <div className="flex flex-col items-center justify-center py-12 space-y-4">
                   <div className="relative">
                     <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-t-primary"></div>
@@ -348,7 +384,6 @@ const MainDashboard = () => {
                   </div>
                 </div>
               ) : willsState.error ? (
-                /* Error State */
                 <div className="flex flex-col items-center justify-center py-12 space-y-4">
                   <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
                     <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
@@ -362,7 +397,6 @@ const MainDashboard = () => {
                   </div>
                 </div>
               ) : willsState.data && willsState.data.length > 0 ? (
-                /* Wills Data */
                 <>
                   <div className="space-y-4">
                     {willsState.data.slice(0, 3).map((will, index) => (
@@ -403,7 +437,6 @@ const MainDashboard = () => {
                   </div>
                 </>
               ) : (
-                /* No Wills State */
                 <div className="flex flex-col items-center justify-center py-12 space-y-4">
                   <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
                     <FileText className="h-6 w-6 text-muted-foreground" />

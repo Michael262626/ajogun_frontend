@@ -80,9 +80,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("💰 Fetching balance for userId:", userId)
       const balanceResult = await apiService.getWalletBalance(userId)
-      console.log("💰 Balance API response:", balanceResult)
+      console.log("💰 Balance API response:", JSON.stringify(balanceResult, null, 2))
 
-      if (balanceResult.success && typeof balanceResult.balance === "string") {
+      if (balanceResult.success && typeof balanceResult.balance === "string" && !isNaN(parseFloat(balanceResult.balance))) {
         console.log("💰 Setting balance to:", balanceResult.balance)
         setBalance(balanceResult.balance)
       } else {
@@ -91,22 +91,26 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error("💰 Failed to refresh balance:", error)
-      throw error // Re-throw to allow callers to handle errors
+      throw error
     } finally {
       setIsLoadingBalance(false)
       setIsRefreshingBalance(false)
     }
   }, [isRefreshingBalance])
 
-    const logout = useCallback(() => {
-    // disconnect wallet here instead of separate function
-    console.log("wallet disconnected");
-    setUserId(null);
-    setPassword(null);
-    localStorage.removeItem("ajogun-userId");
-    localStorage.removeItem("ajogun-password");
-  }, []);
-
+  const logout = useCallback(() => {
+    console.log("🔐 Disconnecting wallet and logging out")
+    setAddress(null)
+    setIsConnected(false)
+    setBalance("0.00")
+    setUserId(null)
+    setPassword(null)
+    localStorage.removeItem("walletAddress")
+    localStorage.removeItem("walletUserId")
+    localStorage.removeItem("walletActivatedAt")
+    localStorage.removeItem("ajogun-userId")
+    localStorage.removeItem("ajogun-password")
+  }, [])
 
   const refreshBalanceFast = useCallback(async () => {
     if (isRefreshingBalance) {
