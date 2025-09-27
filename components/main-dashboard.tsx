@@ -27,6 +27,7 @@ import {
   Search,
   ChevronDown,
   AlertCircle,
+  RefreshCw,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -50,6 +51,8 @@ const MainDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [hasFetchedBalance, setHasFetchedBalance] = useState(false) // Track initial balance fetch
+  const [isRefreshing, setIsRefreshing] = useState(false) // Track manual refresh state
 
   useEffect(() => {
     if (address) {
@@ -72,14 +75,37 @@ const MainDashboard = () => {
 
   // Fetch balance once on mount
   useEffect(() => {
-    if (userId && isConnected) {
-      console.log("🏠 Triggering balance refresh for userId:", userId)
-      refreshBalance(userId).catch((err) => {
-        console.error("🏠 Error in balance refresh:", err)
-        setErrorMessage("Failed to fetch balance. Please try again.")
-      })
+    if (userId && isConnected && !hasFetchedBalance) {
+      console.log("🏠 Triggering initial balance refresh for userId:", userId)
+      refreshBalance(userId)
+        .then(() => {
+          setHasFetchedBalance(true) // Mark as fetched
+          setErrorMessage(null)
+        })
+        .catch((err) => {
+          console.error("🏠 Error in initial balance refresh:", err)
+          setErrorMessage("Failed to fetch balance. Please try again.")
+          setHasFetchedBalance(true) // Mark as fetched even on error
+        })
     }
-  }, [userId, isConnected, refreshBalance])
+  }, [userId, isConnected, refreshBalance, hasFetchedBalance])
+
+  // Manual refresh handler
+  const handleRefresh = async () => {
+    if (userId && isConnected) {
+      setIsRefreshing(true)
+      try {
+        console.log("🏠 Manual balance refresh for userId:", userId)
+        await refreshBalance(userId)
+        setErrorMessage(null)
+      } catch (err) {
+        console.error("🏠 Error in manual balance refresh:", err)
+        setErrorMessage("Failed to refresh balance. Please try again.")
+      } finally {
+        setIsRefreshing(false)
+      }
+    }
+  }
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -87,8 +113,7 @@ const MainDashboard = () => {
       maximumFractionDigits: 2,
     }).format(num)
   }
-
-  const sidebarLinks = [
+   const sidebarLinks = [
     { name: "Dashboard", icon: Home, href: "/dashboard", active: true },
     { name: "Create Will", icon: FileText, href: "/create" },
     { name: "Beneficiaries", icon: Users, href: "/beneficiaries" },
@@ -288,6 +313,11 @@ const MainDashboard = () => {
                   </div>
                 )}
               </div>
+
+              <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing || isLoadingBalance}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing || isLoadingBalance ? "animate-spin" : ""}`} />
+                {isRefreshing || isLoadingBalance ? "Refreshing..." : "Refresh"}
+              </Button>
             </div>
           </div>
         </header>
