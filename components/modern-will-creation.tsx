@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useWallet } from "@/lib/wallet-context"; // Removed duplicate import
+import { useState, useEffect } from "react";
+import { useWallet } from "@/lib/wallet-context";
 import { useApi } from "@/hooks/use-api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +25,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Shield,
+  CheckCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -40,13 +41,14 @@ interface Beneficiary {
 
 const ModernWillCreation = () => {
   const router = useRouter();
-  const { userId, password, logout } = useWallet(); // Removed isAuthenticated, address as they were unused
-  const { createWill, createWillState } = useApi();
+  const { userId, password, logout } = useWallet();
+  const { createWill, createWillState, fetchWills } = useApi();
   const [currentStep, setCurrentStep] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false); // Added state for terms
-  const [error, setError] = useState<string | null>(null); // Added state for error handling
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([
     {
@@ -76,6 +78,16 @@ const ModernWillCreation = () => {
   ]);
 
   const [willAmount, setWillAmount] = useState("1000");
+
+  // Auto-dismiss toast after 3 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const sidebarLinks = [
     { name: "Dashboard", icon: Home, href: "/dashboard" },
@@ -129,22 +141,22 @@ const ModernWillCreation = () => {
   const handleDeploy = async () => {
     if (!termsAccepted) {
       setError("You must agree to the Terms and Conditions.");
+      setToast({ message: "You must agree to the Terms and Conditions.", type: "error" });
       return;
     }
 
-    const finalUserId = localStorage.getItem("ajogun-userId") || localStorage.getItem("walletUserId")
-        const finalPassword = localStorage.getItem("ajogun-password")
-        console.log("userid and password", finalUserId, finalPassword);
+    const finalUserId = localStorage.getItem("ajogun-userId") || localStorage.getItem("walletUserId");
+    const finalPassword = localStorage.getItem("ajogun-password");
+    console.log("userid and password", finalUserId, finalPassword);
 
     try {
-      
       // Transform willData to API format
       const apiWillData = {
-        userId:finalUserId,
-        password:finalPassword,
+        userId: finalUserId,
+        password: finalPassword,
         heirs: beneficiaries.map(b => b.walletAddress).filter(addr => addr.trim() !== ''),
         shares: beneficiaries.map(b => b.percentage * 100),
-      }
+      };
 
       console.log("Creating will with data:", apiWillData);
 
@@ -158,19 +170,60 @@ Transaction Hash: ${result.transactionHash}
 Created At: ${new Date().toISOString()}
 ==================================`);
 
-        // Navigate to dashboard to show the created will
+        // Show success toast
+        setToast({ message: "Will created successfully!", type: "success" });
+
+        // Fetch wills to update dashboard
+        await fetchWills();
+
+        // Navigate to dashboard
         router.push("/dashboard");
       } else {
-        setError(`Will creation failed: ${result?.message || "Unknown error"}`);
+        const errorMessage = `Will creation failed: ${result?.message || "Unknown error"}`;
+        setError(errorMessage);
+        setToast({ message: errorMessage, type: "error" });
       }
     } catch (error) {
       console.error("Deployment failed:", error);
-      setError(`Deployment failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      const errorMessage = `Deployment failed: ${error instanceof Error ? error.message : "Unknown error"}`;
+      setError(errorMessage);
+      setToast({ message: errorMessage, type: "error" });
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
+          toast.type === "success"
+            ? "bg-green-100 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+            : "bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+        }`}>
+          <div className="flex items-center space-x-2">
+            {toast.type === "success" ? (
+              <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+            ) : (
+              <div className="w-5 h-5 text-red-600 dark:text-red-400">⚠️</div>
+            )}
+            <p className={`text-sm ${
+              toast.type === "success"
+                ? "text-green-800 dark:text-green-200"
+                : "text-red-800 dark:text-red-200"
+            }`}>
+              {toast.type === "success" ? "Success" : "Error"}
+            </p>
+            <p className={`text-sm ${
+              toast.type === "success"
+                ? "text-green-700 dark:text-green-300"
+                : "text-red-700 dark:text-red-300"
+            }`}>
+              {toast.message}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -529,7 +582,6 @@ Created At: ${new Date().toISOString()}
                   </div>
                 </div>
 
-                {/* Terms and Conditions */}
                 <Card className="bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800">
                   <CardContent className="p-4">
                     <div className="flex items-start space-x-3">
