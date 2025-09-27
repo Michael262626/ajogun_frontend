@@ -51,8 +51,8 @@ const MainDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [hasFetchedBalance, setHasFetchedBalance] = useState(false) // Track initial balance fetch
-  const [isRefreshing, setIsRefreshing] = useState(false) // Track manual refresh state
+  const [hasFetchedBalance, setHasFetchedBalance] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   useEffect(() => {
     if (address) {
@@ -61,36 +61,33 @@ const MainDashboard = () => {
     }
   }, [address, fetchWills])
 
-  // Auto-refresh wills every 60 seconds
   useEffect(() => {
     if (!address) return
 
     const interval = setInterval(() => {
       console.log("🔄 Auto-refreshing wills...")
       fetchWills()
-    }, 60000) // 60 seconds
+    }, 60000)
 
     return () => clearInterval(interval)
   }, [address, fetchWills])
 
-  // Fetch balance once on mount
   useEffect(() => {
     if (userId && isConnected && !hasFetchedBalance) {
       console.log("🏠 Triggering initial balance refresh for userId:", userId)
       refreshBalance(userId)
         .then(() => {
-          setHasFetchedBalance(true) // Mark as fetched
+          setHasFetchedBalance(true)
           setErrorMessage(null)
         })
         .catch((err) => {
           console.error("🏠 Error in initial balance refresh:", err)
           setErrorMessage("Failed to fetch balance. Please try again.")
-          setHasFetchedBalance(true) // Mark as fetched even on error
+          setHasFetchedBalance(true)
         })
     }
   }, [userId, isConnected, refreshBalance, hasFetchedBalance])
 
-  // Manual refresh handler
   const handleRefresh = async () => {
     if (userId && isConnected) {
       setIsRefreshing(true)
@@ -113,7 +110,8 @@ const MainDashboard = () => {
       maximumFractionDigits: 2,
     }).format(num)
   }
-   const sidebarLinks = [
+
+  const sidebarLinks = [
     { name: "Dashboard", icon: Home, href: "/dashboard", active: true },
     { name: "Create Will", icon: FileText, href: "/create" },
     { name: "Beneficiaries", icon: Users, href: "/beneficiaries" },
@@ -124,6 +122,15 @@ const MainDashboard = () => {
 
   const suiBalance = parseFloat(balance) / 1000000000 || 0
   console.log("🏠 Dashboard - Raw balance:", balance, "Parsed SUI balance:", suiBalance)
+
+  const getWillStatus = () => {
+    if (willsState.data && willsState.data.length > 0) {
+      // Check if any will has 'will created' status
+      const hasWillCreated = willsState.data.some(will => will.status.toLowerCase() === 'will created')
+      return hasWillCreated ? 'Will Created' : 'Active'
+    }
+    return 'Not Created'
+  }
 
   const statsData = [
     {
@@ -141,7 +148,7 @@ const MainDashboard = () => {
     },
     {
       title: "Will Status",
-      value: willsState.data && willsState.data.length > 0 ? "Active" : "Not Created",
+      value: getWillStatus(),
       icon: Shield,
       change: willsState.data && willsState.data.length > 0 ? "Secured" : "Create Now",
       trend: "neutral",
@@ -446,12 +453,14 @@ const MainDashboard = () => {
                         <div className="flex items-center space-x-2">
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              will.status === "active"
-                                ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                                : "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
+                              will.status.toLowerCase() === 'will created'
+                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                : will.status.toLowerCase() === 'active'
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
                             }`}
                           >
-                            {will.status}
+                            {will.status.toLowerCase() === 'will created' ? 'Will Created' : will.status}
                           </span>
                           <Button variant="ghost" size="sm">
                             View

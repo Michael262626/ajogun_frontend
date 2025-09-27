@@ -68,7 +68,7 @@ export interface WillResponse {
   willIndex?: number
   contractAddress?: string
   transactionHash?: string
-  status?: 'active' | 'executed' | 'revoked'
+  status?: 'active' | 'executed' | 'revoked' | 'will created'
   createdAt?: string
   success?: boolean
   message?: string
@@ -384,7 +384,7 @@ class ApiService {
   //     }
   //   }
   // }
-  async createWill(willData: CreateWillRequest): Promise<WillResponse> {
+ async createWill(willData: CreateWillRequest): Promise<WillResponse> {
   try {
     console.log("📦 Will payload being sent to backend:", willData);
 
@@ -415,10 +415,9 @@ class ApiService {
       success: true,
       willIndex: willIndex,
       transactionHash: transactionHash,
-      contractAddress: response.contractAddress || '', // Optional field
-      status: 'active', // Default status since backend doesn't provide
+      contractAddress: response.contractAddress || '',
+      status: 'will created', // Updated status
       message: response.message || 'Will created successfully',
-      // Include the full backend response for debugging
       backendResponse: response
     };
   } catch (error) {
@@ -426,8 +425,8 @@ class ApiService {
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to create will'
-    };
-  }
+    };
+  }
 }
 
   /**
