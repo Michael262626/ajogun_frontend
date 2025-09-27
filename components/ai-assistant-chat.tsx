@@ -23,13 +23,20 @@ import {
   Wallet,
 } from "lucide-react"
 
+// Define the response key type
 type ResponseKey = "will" | "risk" | "message" | "default";
+
+// Define the response structure
+interface AIResponse {
+  content: string;
+  suggestions: string[];
+}
 
 const AIAssistantChat = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      type: "ai",
+      type: "ai" as const,
       content:
         "Hello! I'm your AI Will Assistant. I can help you create a comprehensive digital will, analyze your asset distribution for potential risks, and guide you through the entire process. What would you like to start with?",
       timestamp: new Date(),
@@ -44,9 +51,10 @@ const AIAssistantChat = () => {
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
-  const [activeFeature, setActiveFeature] = useState(null)
+  const [activeFeature, setActiveFeature] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+
   const aiFeatures = [
     {
       id: "will-drafting",
@@ -81,6 +89,7 @@ const AIAssistantChat = () => {
       examples: ["Explain claim process", "Wallet setup guide", "Asset transfer help"],
     },
   ]
+
   const quickActions = [
     { text: "Draft a simple will", icon: FileText, category: "will-drafting" },
     { text: "Check my asset distribution", icon: Shield, category: "risk-analysis" },
@@ -89,6 +98,7 @@ const AIAssistantChat = () => {
     { text: "Analyze beneficiary setup", icon: Users, category: "risk-analysis" },
     { text: "Help with wallet security", icon: Wallet, category: "executor-guidance" },
   ]
+
   const aiInsights = [
     {
       type: "warning",
@@ -115,14 +125,16 @@ const AIAssistantChat = () => {
       color: "text-green-600",
     },
   ]
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
+
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
     const userMessage = {
       id: Date.now(),
-      type: "user",
+      type: "user" as const,
       content: inputValue,
       timestamp: new Date(),
       suggestions: [],
@@ -137,8 +149,9 @@ const AIAssistantChat = () => {
       setIsTyping(false)
     }, 1500)
   }
+
   const generateAIResponse = (userInput: string) => {
-    const responses: Record<ResponseKey, { content: string; suggestions: string[] }> = {
+    const responses: Record<ResponseKey, AIResponse> = {
       will: {
         content: `I'd be happy to help you create a digital will! Let me guide you through this step by step.
 **Will Creation Process:**
@@ -262,6 +275,7 @@ What specific area would you like to focus on today?`,
         ],
       },
     }
+
     let responseKey: ResponseKey = "default"
     const input = userInput.toLowerCase()
     if (input.includes("will") || input.includes("create") || input.includes("draft")) {
@@ -271,26 +285,30 @@ What specific area would you like to focus on today?`,
     } else if (input.includes("message") || input.includes("write") || input.includes("daughter")) {
       responseKey = "message"
     }
+
     const response = responses[responseKey]
     return {
       id: Date.now(),
-      type: "ai",
+      type: "ai" as const,
       content: response.content,
       timestamp: new Date(),
       suggestions: response.suggestions,
     }
   }
-  const handleSuggestionClick = (suggestion) => {
+
+  const handleSuggestionClick = (suggestion: string) => {
     setInputValue(suggestion)
     inputRef.current?.focus()
   }
-  const handleKeyPress = (e) => {
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       handleSendMessage()
     }
   }
-  const MessageBubble = ({ message }) => {
+
+  const MessageBubble = ({ message }: { message: typeof messages[0] }) => {
     const isAI = message.type === "ai"
     return (
       <div className={`flex ${isAI ? "justify-start" : "justify-end"} mb-4`}>
@@ -347,6 +365,7 @@ What specific area would you like to focus on today?`,
       </div>
     )
   }
+
   const TypingIndicator = () => (
     <div className="flex justify-start mb-4">
       <div className="flex flex-row">
@@ -372,6 +391,7 @@ What specific area would you like to focus on today?`,
       </div>
     </div>
   )
+
   if (isMinimized) {
     return (
       <div className="fixed bottom-4 right-4 z-50">
@@ -390,6 +410,7 @@ What specific area would you like to focus on today?`,
       </div>
     )
   }
+
   return (
     <div className="min-h-screen bg-background lg:grid lg:grid-cols-4 lg:gap-6 p-6">
       {/* AI Features Sidebar */}
@@ -568,4 +589,5 @@ What specific area would you like to focus on today?`,
     </div>
   )
 }
+
 export default AIAssistantChat
