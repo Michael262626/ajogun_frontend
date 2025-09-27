@@ -22,6 +22,9 @@ import {
   Users,
   Wallet,
 } from "lucide-react"
+
+type ResponseKey = "will" | "risk" | "message" | "default";
+
 const AIAssistantChat = () => {
   const [messages, setMessages] = useState([
     {
@@ -135,7 +138,7 @@ const AIAssistantChat = () => {
     }, 1500)
   }
   const generateAIResponse = (userInput: string) => {
-    const responses = {
+    const responses: Record<ResponseKey, { content: string; suggestions: string[] }> = {
       will: {
         content: `I'd be happy to help you create a digital will! Let me guide you through this step by step.
 **Will Creation Process:**
@@ -259,7 +262,7 @@ What specific area would you like to focus on today?`,
         ],
       },
     }
-    let responseKey: keyof typeof responses = "default"
+    let responseKey: ResponseKey = "default"
     const input = userInput.toLowerCase()
     if (input.includes("will") || input.includes("create") || input.includes("draft")) {
       responseKey = "will"
