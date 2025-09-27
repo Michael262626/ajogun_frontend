@@ -32,11 +32,20 @@ interface AIResponse {
   suggestions: string[];
 }
 
+// Define the message type to support both "ai" and "user"
+interface Message {
+  id: number;
+  type: "ai" | "user";
+  content: string;
+  timestamp: Date;
+  suggestions: string[];
+}
+
 const AIAssistantChat = () => {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      type: "ai" as const,
+      type: "ai",
       content:
         "Hello! I'm your AI Will Assistant. I can help you create a comprehensive digital will, analyze your asset distribution for potential risks, and guide you through the entire process. What would you like to start with?",
       timestamp: new Date(),
@@ -132,12 +141,12 @@ const AIAssistantChat = () => {
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
-    const userMessage = {
+    const userMessage: Message = {
       id: Date.now(),
-      type: "user" as const,
+      type: "user",
       content: inputValue,
       timestamp: new Date(),
-      suggestions: [],
+      suggestions: [], // User messages have empty suggestions
     }
     setMessages((prev) => [...prev, userMessage])
     setInputValue("")
@@ -150,7 +159,7 @@ const AIAssistantChat = () => {
     }, 1500)
   }
 
-  const generateAIResponse = (userInput: string) => {
+  const generateAIResponse = (userInput: string): Message => {
     const responses: Record<ResponseKey, AIResponse> = {
       will: {
         content: `I'd be happy to help you create a digital will! Let me guide you through this step by step.
@@ -289,7 +298,7 @@ What specific area would you like to focus on today?`,
     const response = responses[responseKey]
     return {
       id: Date.now(),
-      type: "ai" as const,
+      type: "ai",
       content: response.content,
       timestamp: new Date(),
       suggestions: response.suggestions,
@@ -308,7 +317,7 @@ What specific area would you like to focus on today?`,
     }
   }
 
-  const MessageBubble = ({ message }: { message: typeof messages[0] }) => {
+  const MessageBubble = ({ message }: { message: Message }) => {
     const isAI = message.type === "ai"
     return (
       <div className={`flex ${isAI ? "justify-start" : "justify-end"} mb-4`}>
@@ -326,7 +335,7 @@ What specific area would you like to focus on today?`,
             }`}
           >
             <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
-            {isAI && message.suggestions && (
+            {isAI && message.suggestions.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {message.suggestions.map((suggestion, index) => (
                   <button
