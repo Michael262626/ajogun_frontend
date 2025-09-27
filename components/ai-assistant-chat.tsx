@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useRef, useEffect } from "react"
 import {
   Send,
@@ -23,7 +22,6 @@ import {
   Users,
   Wallet,
 } from "lucide-react"
-
 const AIAssistantChat = () => {
   const [messages, setMessages] = useState([
     {
@@ -46,7 +44,6 @@ const AIAssistantChat = () => {
   const [activeFeature, setActiveFeature] = useState(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-
   const aiFeatures = [
     {
       id: "will-drafting",
@@ -81,7 +78,6 @@ const AIAssistantChat = () => {
       examples: ["Explain claim process", "Wallet setup guide", "Asset transfer help"],
     },
   ]
-
   const quickActions = [
     { text: "Draft a simple will", icon: FileText, category: "will-drafting" },
     { text: "Check my asset distribution", icon: Shield, category: "risk-analysis" },
@@ -90,7 +86,6 @@ const AIAssistantChat = () => {
     { text: "Analyze beneficiary setup", icon: Users, category: "risk-analysis" },
     { text: "Help with wallet security", icon: Wallet, category: "executor-guidance" },
   ]
-
   const aiInsights = [
     {
       type: "warning",
@@ -117,14 +112,11 @@ const AIAssistantChat = () => {
       color: "text-green-600",
     },
   ]
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
-
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
-
     const userMessage = {
       id: Date.now(),
       type: "user",
@@ -132,11 +124,9 @@ const AIAssistantChat = () => {
       timestamp: new Date(),
       suggestions: [],
     }
-
     setMessages((prev) => [...prev, userMessage])
     setInputValue("")
     setIsTyping(true)
-
     // Simulate AI response
     setTimeout(() => {
       const aiResponse = generateAIResponse(inputValue)
@@ -144,35 +134,28 @@ const AIAssistantChat = () => {
       setIsTyping(false)
     }, 1500)
   }
-
   const generateAIResponse = (userInput: string) => {
     const responses = {
       will: {
         content: `I'd be happy to help you create a digital will! Let me guide you through this step by step.
-
 **Will Creation Process:**
-
 1. **Asset Inventory**: What digital assets do you want to include?
    - Cryptocurrencies (BTC, ETH, SUI, etc.)
    - NFTs and digital collectibles
    - DeFi positions and staked assets
    - Digital accounts and subscriptions
-
 2. **Beneficiary Selection**: Who should receive your assets?
    - Family members with verified wallet addresses
    - Charitable organizations
    - Friends or business partners
-
 3. **Distribution Strategy**: How should assets be divided?
    - Percentage-based allocation
    - Specific asset assignments
    - Conditional distributions
-
 4. **Execution Conditions**: When should the will activate?
    - Dead man's switch (recommended: 365 days)
    - Multi-signature requirements
    - External verification methods
-
 Would you like me to start with a template based on your current wallet contents, or do you have specific requirements?`,
         suggestions: [
           "Start with my current wallet",
@@ -183,35 +166,28 @@ Would you like me to start with a template based on your current wallet contents
       },
       risk: {
         content: `Excellent choice! I'll perform a comprehensive risk analysis of your will setup.
-
 **AI Risk Assessment Areas:**
-
 🔍 **Distribution Analysis**
 - Checking allocation percentages for fairness
 - Identifying potential family disputes
 - Validating beneficiary relationships
-
 ⚠️ **Security Verification**
 - Wallet address validation and checksums
 - Multi-signature setup recommendations
 - Dead man's switch configuration
-
 🛡️ **Fraud Detection**
 - Unusual beneficiary patterns
 - Recently added addresses (potential coercion)
 - Execution timing anomalies
-
 ⏰ **Legal Compliance**
 - Jurisdiction-specific requirements
 - Tax implications for beneficiaries
 - Estate planning integration
-
 **Current Analysis Results:**
 - ✅ Wallet addresses validated
 - ⚠️ Distribution imbalance detected (70% to one beneficiary)
 - ✅ Dead man's switch properly configured
 - ❌ No backup executor specified
-
 Would you like me to provide detailed recommendations for the identified issues?`,
         suggestions: [
           "Fix distribution imbalance",
@@ -222,32 +198,25 @@ Would you like me to provide detailed recommendations for the identified issues?
       },
       message: {
         content: `I'll help you craft a meaningful message for your daughter. Personal messages provide comfort and guidance to loved ones during difficult times.
-
 **Message Enhancement Options:**
-
 ✨ **Polish & Refine**
 - Improve grammar and sentence flow
 - Enhance clarity and readability
 - Add professional structure
-
 📝 **Tone Adjustment**
 - Make more conversational and warm
 - Add formal legal language
 - Balance emotional and practical content
-
 💝 **Personalization**
 - Include specific memories
 - Add life advice and wisdom
 - Reference shared experiences
-
 🎯 **Purpose-Driven**
 - Financial guidance and responsibility
 - Family values and traditions
 - Future aspirations and hopes
-
 **Sample Enhanced Message:**
 "My dearest daughter, as you receive this inheritance, know that it represents more than financial assets—it's a foundation for your dreams and a testament to my unwavering love for you..."
-
 What kind of message would you like to create? You can share your initial thoughts, and I'll help enhance and refine them.`,
         suggestions: [
           "Write a loving personal message",
@@ -258,36 +227,29 @@ What kind of message would you like to create? You can share your initial though
       },
       default: {
         content: `I understand you're looking for help with your digital will. As your AI assistant, I can provide comprehensive support across multiple areas:
-
 **Core Capabilities:**
-
 📋 **Will Creation & Management**
 - Draft wills from natural language descriptions
 - Template-based will generation
 - Asset allocation optimization
 - Legal compliance checking
-
 🔍 **Risk Analysis & Security**
 - Fraud pattern detection
 - Beneficiary verification
 - Distribution fairness analysis
 - Security recommendation engine
-
 ✍️ **Message & Communication**
 - Beneficiary message enhancement
 - Legal document drafting
 - Multi-language support
 - Tone and style adjustment
-
 🎓 **Education & Guidance**
 - Blockchain inheritance explanation
 - Estate planning best practices
 - Tax implication analysis
 - Executor guidance and training
-
 **Smart Insights:**
 I've analyzed your current setup and identified 3 areas for improvement. Would you like me to walk through these recommendations?
-
 What specific area would you like to focus on today?`,
         suggestions: [
           "Create a new will",
@@ -297,10 +259,8 @@ What specific area would you like to focus on today?`,
         ],
       },
     }
-
-    let responseKey = "default"
+    let responseKey: keyof typeof responses = "default"
     const input = userInput.toLowerCase()
-
     if (input.includes("will") || input.includes("create") || input.includes("draft")) {
       responseKey = "will"
     } else if (input.includes("risk") || input.includes("analyze") || input.includes("check")) {
@@ -308,9 +268,7 @@ What specific area would you like to focus on today?`,
     } else if (input.includes("message") || input.includes("write") || input.includes("daughter")) {
       responseKey = "message"
     }
-
     const response = responses[responseKey]
-
     return {
       id: Date.now(),
       type: "ai",
@@ -319,22 +277,18 @@ What specific area would you like to focus on today?`,
       suggestions: response.suggestions,
     }
   }
-
   const handleSuggestionClick = (suggestion) => {
     setInputValue(suggestion)
     inputRef.current?.focus()
   }
-
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       handleSendMessage()
     }
   }
-
   const MessageBubble = ({ message }) => {
     const isAI = message.type === "ai"
-
     return (
       <div className={`flex ${isAI ? "justify-start" : "justify-end"} mb-4`}>
         <div className={`flex max-w-[85%] ${isAI ? "flex-row" : "flex-row-reverse"}`}>
@@ -345,14 +299,12 @@ What specific area would you like to focus on today?`,
           >
             {isAI ? <Bot className="w-4 h-4 text-white" /> : <User className="w-4 h-4 text-white" />}
           </div>
-
           <div
             className={`rounded-2xl px-4 py-3 ${
               isAI ? "bg-muted text-card-foreground" : "bg-primary text-primary-foreground"
             }`}
           >
             <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
-
             {isAI && message.suggestions && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {message.suggestions.map((suggestion, index) => (
@@ -366,12 +318,10 @@ What specific area would you like to focus on today?`,
                 ))}
               </div>
             )}
-
             <div className="flex items-center justify-between mt-2">
               <span className="text-xs opacity-70">
                 {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </span>
-
               {isAI && (
                 <div className="flex items-center space-x-1 ml-4">
                   <button className="p-1 opacity-70 hover:opacity-100 hover:bg-card rounded transition-all">
@@ -394,14 +344,12 @@ What specific area would you like to focus on today?`,
       </div>
     )
   }
-
   const TypingIndicator = () => (
     <div className="flex justify-start mb-4">
       <div className="flex flex-row">
         <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mr-3">
           <Bot className="w-4 h-4 text-white" />
         </div>
-
         <div className="bg-muted rounded-2xl px-4 py-3">
           <div className="flex items-center space-x-1">
             <div className="flex space-x-1">
@@ -421,7 +369,6 @@ What specific area would you like to focus on today?`,
       </div>
     </div>
   )
-
   if (isMinimized) {
     return (
       <div className="fixed bottom-4 right-4 z-50">
@@ -440,7 +387,6 @@ What specific area would you like to focus on today?`,
       </div>
     )
   }
-
   return (
     <div className="min-h-screen bg-background lg:grid lg:grid-cols-4 lg:gap-6 p-6">
       {/* AI Features Sidebar */}
@@ -456,7 +402,6 @@ What specific area would you like to focus on today?`,
               <p className="text-sm text-muted-foreground">Powered by advanced AI</p>
             </div>
           </div>
-
           <div className="space-y-3">
             {aiFeatures.map((feature, index) => (
               <div
@@ -500,7 +445,6 @@ What specific area would you like to focus on today?`,
             ))}
           </div>
         </div>
-
         {/* AI Insights */}
         <div className="bg-card rounded-xl p-6 border border-border">
           <h3 className="font-semibold text-card-foreground mb-4 flex items-center">
@@ -524,7 +468,6 @@ What specific area would you like to focus on today?`,
             ))}
           </div>
         </div>
-
         {/* Quick Actions */}
         <div className="bg-card rounded-xl p-6 border border-border">
           <h3 className="font-semibold text-card-foreground mb-4">Quick Actions</h3>
@@ -542,7 +485,6 @@ What specific area would you like to focus on today?`,
           </div>
         </div>
       </div>
-
       {/* Chat Interface */}
       <div className="lg:col-span-3">
         <div className="bg-card rounded-xl border border-border h-[calc(100vh-3rem)] flex flex-col">
@@ -566,7 +508,6 @@ What specific area would you like to focus on today?`,
                 </p>
               </div>
             </div>
-
             <div className="flex items-center space-x-2">
               <button className="p-2 text-muted-foreground hover:text-card-foreground hover:bg-muted rounded-lg transition-colors">
                 <ChevronDown className="w-4 h-4" />
@@ -579,17 +520,14 @@ What specific area would you like to focus on today?`,
               </button>
             </div>
           </div>
-
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message) => (
               <MessageBubble key={message.id} message={message} />
             ))}
-
             {isTyping && <TypingIndicator />}
             <div ref={messagesEndRef} />
           </div>
-
           {/* Input Area */}
           <div className="p-4 border-t border-border">
             <div className="flex items-end space-x-3">
@@ -605,7 +543,6 @@ What specific area would you like to focus on today?`,
                   disabled={isTyping}
                 />
               </div>
-
               <button
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim() || isTyping}
@@ -618,7 +555,6 @@ What specific area would you like to focus on today?`,
                 <Send className="w-5 h-5" />
               </button>
             </div>
-
             <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
               <span>Press Enter to send • Shift+Enter for new line</span>
               <span>{inputValue.length}/2000</span>
@@ -629,5 +565,4 @@ What specific area would you like to focus on today?`,
     </div>
   )
 }
-
 export default AIAssistantChat
