@@ -43,11 +43,16 @@ const ModernWalletDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // Auto-refresh balance when userId is available
   useEffect(() => {
     if (userId && isConnected) {
-      refreshBalance(userId)
+      console.log("🏦 Triggering balance refresh for userId:", userId)
+      refreshBalance(userId).catch((err) => {
+        console.error("🏦 Error in balance refresh:", err)
+        setErrorMessage("Failed to fetch balance. Please try again.");
+      })
     }
   }, [userId, isConnected, refreshBalance])
 
@@ -82,6 +87,10 @@ const ModernWalletDashboard = () => {
       setIsRefreshing(true)
       try {
         await refreshBalance(userId)
+        setErrorMessage(null)
+      } catch (err) {
+        console.error("🏦 Manual refresh error:", err)
+        setErrorMessage("Failed to refresh balance. Please try again.")
       } finally {
         setIsRefreshing(false)
       }
@@ -89,15 +98,16 @@ const ModernWalletDashboard = () => {
   }
 
   // Use real balance for SUI, mock data for other tokens
-  const suiBalance = parseFloat(balance)/1000000000 || 0
-  console.log("Dashboard - Raw balance:", balance, "Parsed SUI balance:", suiBalance)
+  const suiBalance = parseFloat(balance) / 1000000000 || 0
+  console.log("🏦 Dashboard - Raw balance:", balance, "Parsed SUI balance:", suiBalance)
+
   const tokens = [
     {
       id: "sui",
       name: "SUI",
       symbol: "SUI",
       balance: suiBalance,
-      usdValue: suiBalance * 2, // Assuming 1 SUI = $2 (you can make this dynamic)
+      usdValue: suiBalance * 2, // Assuming 1 SUI = $2
       change24h: 12.5,
       logo: "🔵",
     },
@@ -258,9 +268,9 @@ const ModernWalletDashboard = () => {
                 )}
               </div>
 
-              <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
-                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing || isLoadingBalance}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing || isLoadingBalance ? 'animate-spin' : ''}`} />
+                {isRefreshing || isLoadingBalance ? 'Refreshing...' : 'Refresh'}
               </Button>
             </div>
           </div>
@@ -268,6 +278,19 @@ const ModernWalletDashboard = () => {
 
         {/* Dashboard content */}
         <main className="p-6 space-y-6">
+          {/* Error Message */}
+          {errorMessage && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-5 h-5 text-red-600">⚠️</div>
+                <div>
+                  <h3 className="font-medium text-red-800 dark:text-red-200">Error</h3>
+                  <p className="text-sm text-red-700 dark:text-red-300">{errorMessage}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* No Wallet Connected Notice */}
           {!isConnected && (
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
@@ -282,6 +305,7 @@ const ModernWalletDashboard = () => {
               </div>
             </div>
           )}
+
           {/* Balance Overview */}
           <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl p-6 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-5 rounded-full -mr-16 -mt-16"></div>
@@ -306,6 +330,8 @@ const ModernWalletDashboard = () => {
                         Loading...
                         <div className="ml-2 animate-spin rounded-full h-6 w-6 border-2 border-white/20 border-t-white"></div>
                       </span>
+                    ) : errorMessage ? (
+                      "Error"
                     ) : showBalance ? (
                       `${formatNumber(suiBalance)} SUI`
                     ) : (
@@ -325,11 +351,15 @@ const ModernWalletDashboard = () => {
                 <Button 
                   onClick={() => setIsTransferModalOpen(true)}
                   className="bg-white/10 hover:bg-white/20 text-white border-0 backdrop-blur-sm transition-all duration-200"
+                  disabled={!isConnected}
                 >
                   <Send className="w-4 h-4 mr-2" />
                   Send
                 </Button>
-                <Button className="bg-white/10 hover:bg-white/20 text-white border-0 backdrop-blur-sm transition-all duration-200">
+                <Button 
+                  className="bg-white/10 hover:bg-white/20 text-white border-0 backdrop-blur-sm transition-all duration-200"
+                  disabled={!isConnected}
+                >
                   <Download className="w-4 h-4 mr-2" />
                   Receive
                 </Button>
@@ -474,7 +504,10 @@ const ModernWalletDashboard = () => {
         onClose={() => setIsTransferModalOpen(false)}
         onSuccess={() => {
           if (userId) {
-            refreshBalance(userId)
+            refreshBalance(userId).catch((err) => {
+              console.error("🏦 Error refreshing balance after transfer:", err)
+              setErrorMessage("Failed to refresh balance after transfer. Please try again.")
+            })
           }
         }}
       />

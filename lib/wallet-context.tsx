@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useCallback } from "react"
 import { apiService } from "@/lib/api-service"
 
 interface WalletContextType {
@@ -40,9 +40,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [isVerifying, setIsVerifying] = useState(false)
   const [isLoadingBalance, setIsLoadingBalance] = useState(false)
   const [pendingWallet, setPendingWallet] = useState<{ address: string; mnemonic: string; userId: string; password: string } | null>(null)
-  const isAuthenticated = !!userId && !!password
-
   const [isRefreshingBalance, setIsRefreshingBalance] = useState(false)
+  const isAuthenticated = !!userId && !!password
 
   useEffect(() => {
     // Check if wallet was previously connected
@@ -55,39 +54,22 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       console.log(`📍 Address: ${savedAddress}`)
       console.log(`👤 User ID: ${savedUserId}`)
       console.log(`📅 Activated: ${walletActivatedAt}`)
-
       setAddress(savedAddress)
+      setUserId(savedUserId)
       setIsConnected(true)
       // Load balance from API with saved userId
-      // refreshBalance(savedUserId)
+      refreshBalance(savedUserId).catch((err) => {
+        console.error("🔄 Failed to restore balance:", err)
+      })
     }
-  }, [])
+  }, []) // Note: `refreshBalance` is not a dependency due to useCallback
 
-  // Auto-refresh balance every 30 seconds when connected
-  // useEffect(() => {
-  //   if (!isConnected) return
-
-  //   const savedUserId = localStorage.getItem("walletUserId")
-  //   if (!savedUserId) return
-
-  //   const interval = setInterval(() => {
-  //     const currentUserId = localStorage.getItem("walletUserId")
-  //     if (currentUserId) {
-  //       console.log("🔄 Auto-refreshing balance...")
-  //       refreshBalance(currentUserId)
-  //     }
-  //   }, 30000) // 30 seconds
-
-  //   return () => clearInterval(interval)
-  // }, [isConnected])
-
-  const refreshBalance = async (userId?: string) => {
+  const refreshBalance = useCallback(async (userId?: string) => {
     if (!userId) {
-      console.warn("Cannot refresh balance without userId")
+      console.warn("💰 Cannot refresh balance without userId")
       return
     }
 
-    // Prevent multiple simultaneous balance requests
     if (isRefreshingBalance) {
       console.log("💰 Balance refresh already in progress, skipping...")
       return
@@ -100,31 +82,33 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       const balanceResult = await apiService.getWalletBalance(userId)
       console.log("💰 Balance API response:", balanceResult)
 
-      if (balanceResult.success) {
+      if (balanceResult.success && typeof balanceResult.balance === "string") {
         console.log("💰 Setting balance to:", balanceResult.balance)
         setBalance(balanceResult.balance)
       } else {
-        console.warn("💰 Balance fetch failed:", balanceResult.message)
+        console.warn("💰 Balance fetch failed:", balanceResult.message || "Invalid balance data")
+        throw new Error(balanceResult.message || "Invalid balance data")
       }
     } catch (error) {
       console.error("💰 Failed to refresh balance:", error)
+      throw error // Re-throw to allow callers to handle errors
     } finally {
       setIsLoadingBalance(false)
       setIsRefreshingBalance(false)
     }
-  }
+  }, [isRefreshingBalance])
 
-  const logout = () => {
-    disconnectWallet()
-    setUserId(null)
-    setPassword(null)
-    localStorage.removeItem("ajogun-userId")
-    localStorage.removeItem("ajogun-password")
-  }
+    const logout = useCallback(() => {
+    // disconnect wallet here instead of separate function
+    console.log("wallet disconnected");
+    setUserId(null);
+    setPassword(null);
+    localStorage.removeItem("ajogun-userId");
+    localStorage.removeItem("ajogun-password");
+  }, []);
 
 
-  const refreshBalanceFast = async () => {
-    // Prevent multiple simultaneous balance requests
+  const refreshBalanceFast = useCallback(async () => {
     if (isRefreshingBalance) {
       console.log("⚡ Balance refresh already in progress, skipping fast refresh...")
       return
@@ -138,32 +122,29 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
     console.log("⚡ Fast balance refresh triggered")
     await refreshBalance(savedUserId)
-  }
+  }, [isRefreshingBalance, refreshBalance])
 
-  const createWallet = async (userId: string, password: string) => {
+  const createWallet = useCallback(async (userId: string, password: string) => {
     setIsCreating(true)
     try {
-      console.log('Creating wallet for user:', userId)
+      console.log("🔐 Creating wallet for user:", userId)
       const result = await apiService.createWallet({ userId, password })
-
-      console.log('Wallet creation result:', result)
+      console.log("🔐 Wallet creation result:", result)
 
       if (result.success && result.address && result.mnemonic) {
-        // Wallet created successfully - log the creation
         console.log("🔐 === WALLET CREATION SUCCESS ===")
         console.log(`✅ User ID: ${userId}`)
         console.log(`✅ Wallet Address: ${result.address}`)
         console.log(`⏳ Status: PENDING VERIFICATION`)
-        console.log(`🔑 Mnemonic Length: ${result.mnemonic.split(' ').length} words`)
+        console.log(`🔑 Mnemonic Length: ${result.mnemonic.split(" ").length} words`)
         console.log(`📅 Creation Time: ${new Date().toISOString()}`)
         console.log("==================================")
 
-        // Store pending wallet info for verification step
         setPendingWallet({
           address: result.address,
           mnemonic: result.mnemonic,
           userId,
-          password
+          password,
         })
 
         return {
@@ -171,40 +152,40 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           address: result.address,
           mnemonic: result.mnemonic,
           requiresVerification: result.requiresVerification,
-          message: result.message
+          message: result.message,
         }
       } else {
+        console.warn("🔐 Wallet creation failed:", result.message)
         return { success: false, message: result.message || "Failed to create wallet" }
       }
     } catch (error) {
-      console.error("Failed to create wallet:", error)
+      console.error("🔐 Failed to create wallet:", error)
       return {
         success: false,
-        message: error instanceof Error ? error.message : "Failed to create wallet"
+        message: error instanceof Error ? error.message : "Failed to create wallet",
       }
     } finally {
       setIsCreating(false)
     }
-  }
+  }, [])
 
-  const verifyAndActivateWallet = async (mnemonic: string) => {
+  const verifyAndActivateWallet = useCallback(async (mnemonic: string) => {
     if (!pendingWallet) {
+      console.warn("🔐 No pending wallet to verify")
       return { success: false, message: "No pending wallet to verify" }
     }
 
     setIsVerifying(true)
     try {
-      console.log('Verifying wallet for user:', pendingWallet.userId)
+      console.log("🔐 Verifying wallet for user:", pendingWallet.userId)
       const result = await apiService.verifyAndActivateWallet({
         userId: pendingWallet.userId,
         mnemonic,
-        password: pendingWallet.password
+        password: pendingWallet.password,
       })
-
-      console.log('Wallet verification result:', result)
+      console.log("🔐 Wallet verification result:", result)
 
       if (result.success && result.activated) {
-        // Wallet is now activated - log the success
         console.log("🎉 === WALLET ACTIVATION SUCCESS ===")
         console.log(`✅ User ID: ${pendingWallet.userId}`)
         console.log(`✅ Wallet Address: ${pendingWallet.address}`)
@@ -212,87 +193,85 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         console.log("=====================================")
 
         setAddress(pendingWallet.address)
+        setUserId(pendingWallet.userId)
         setIsConnected(true)
         localStorage.setItem("walletAddress", pendingWallet.address)
         localStorage.setItem("walletUserId", pendingWallet.userId)
-
-        // Store activation timestamp for logging
         localStorage.setItem("walletActivatedAt", new Date().toISOString())
-
-        // Clear pending wallet
-        setPendingWallet(null)
-
-        // Fetch actual balance after wallet activation
-        await refreshBalance(pendingWallet.userId)
-
-        // Store auth credentials
         localStorage.setItem("ajogun-userId", pendingWallet.userId)
         localStorage.setItem("ajogun-password", pendingWallet.password)
 
+        setPendingWallet(null)
+
+        await refreshBalance(pendingWallet.userId)
+
         return { success: true, message: result.message }
       } else {
+        console.warn("🔐 Wallet verification failed:", result.message)
         return { success: false, message: result.message || "Failed to verify wallet" }
       }
     } catch (error) {
-      console.error("Failed to verify wallet:", error)
+      console.error("🔐 Failed to verify wallet:", error)
       return {
         success: false,
-        message: error instanceof Error ? error.message : "Failed to verify wallet"
+        message: error instanceof Error ? error.message : "Failed to verify wallet",
       }
     } finally {
       setIsVerifying(false)
     }
-  }
+  }, [pendingWallet, refreshBalance])
 
-  const connectWallet = async () => {
+  const connectWallet = useCallback(async () => {
     setIsConnecting(true)
     try {
       const savedAddress = localStorage.getItem("walletAddress")
       const savedUserId = localStorage.getItem("walletUserId")
       if (savedAddress && savedUserId) {
+        console.log("🔐 Connecting wallet:", savedAddress)
         setAddress(savedAddress)
+        setUserId(savedUserId)
         setIsConnected(true)
         await refreshBalance(savedUserId)
       } else {
         throw new Error("No wallet found. Please create a wallet first.")
       }
     } catch (error) {
-      console.error("Failed to connect wallet:", error)
+      console.error("🔐 Failed to connect wallet:", error)
       throw error
     } finally {
       setIsConnecting(false)
     }
-  }
+  }, [refreshBalance])
 
-  const transferTokens = async (_recipientAddress: string, _amount: string) => {
+  const transferTokens = useCallback(async (_recipientAddress: string, _amount: string) => {
     if (!address) {
+      console.warn("💸 No wallet connected for transfer")
       return { success: false, message: "No wallet connected" }
     }
 
     try {
-      // We need userId and password for transfers, but they're in auth context
-      // This is a limitation - we might need to pass them as parameters
-      // For now, we'll return an error asking user to use the transfer function from useApi
       return {
         success: false,
-        message: "Please use the transfer function from the dashboard for authenticated transfers"
+        message: "Please use the transfer function from the dashboard for authenticated transfers",
       }
     } catch (error) {
-      console.error("Failed to transfer tokens:", error)
+      console.error("💸 Failed to transfer tokens:", error)
       return {
         success: false,
-        message: error instanceof Error ? error.message : "Transfer failed"
+        message: error instanceof Error ? error.message : "Transfer failed",
       }
     }
-  }
+  }, [address])
 
-  const disconnectWallet = () => {
+  const disconnectWallet = useCallback(() => {
+    console.log("🔐 Disconnecting wallet")
     setAddress(null)
     setIsConnected(false)
     setBalance("0.00")
     localStorage.removeItem("walletAddress")
     localStorage.removeItem("walletUserId")
-  }
+    localStorage.removeItem("walletActivatedAt")
+  }, [])
 
   return (
     <WalletContext.Provider

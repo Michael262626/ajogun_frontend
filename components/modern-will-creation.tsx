@@ -132,19 +132,19 @@ const ModernWillCreation = () => {
       return;
     }
 
-    if (!userId || !password) {
-      setError("User ID or password is missing. Please log in again.");
-      return;
-    }
+    const finalUserId = localStorage.getItem("ajogun-userId") || localStorage.getItem("walletUserId")
+        const finalPassword = localStorage.getItem("ajogun-password")
+        console.log("userid and password", finalUserId, finalPassword);
 
     try {
-      setError(null);
+      
+      // Transform willData to API format
       const apiWillData = {
-        userId,
-        password,
-        heirs: beneficiaries.map((b) => b.walletAddress).filter((addr) => addr.trim() !== ""),
-        shares: beneficiaries.map((b) => b.percentage * 100),
-      };
+        userId:finalUserId,
+        password:finalPassword,
+        heirs: beneficiaries.map(b => b.walletAddress).filter(addr => addr.trim() !== ''),
+        shares: beneficiaries.map(b => b.percentage * 100),
+      }
 
       console.log("Creating will with data:", apiWillData);
 
