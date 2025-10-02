@@ -1,5 +1,5 @@
-import ModernWalletDashboard from "@/components/modern-wallet-dashboard"
+import WalletPage from "@/components/wallet-page"
 
-export default function WalletPage() {
-  return <ModernWalletDashboard />
+export default function Wallet() {
+  return <WalletPage />
 }

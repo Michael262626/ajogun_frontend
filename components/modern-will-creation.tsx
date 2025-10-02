@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react";
 import { useWallet } from "@/lib/wallet-context";
 import { useApi } from "@/hooks/use-api";
+import { mockBeneficiaries, formatAddress } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import SharedLayout from "@/components/shared-layout";
 import {
   Home,
   FileText,

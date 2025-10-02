@@ -1,5 +1,5 @@
-import MainDashboard from "@/components/main-dashboard"
+import ModernDashboard from "@/components/modern-dashboard"
 
 export default function DashboardPage() {
-  return <MainDashboard />
+    return <ModernDashboard />
 }

@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react'
 import { corsProxyService } from '../lib/cors-proxy'
-import { apiService } from '../lib/api-service'
+import { mockApiService as apiService } from '../lib/mock-api-service'
 
 export const CorsDebug: React.FC = () => {
   const [testResults, setTestResults] = useState<any[]>([])
@@ -45,9 +45,12 @@ export const CorsDebug: React.FC = () => {
       results.push({ test: 'Simple GET Request', status: 'running' })
       setTestResults([...results])
       
-      const response = await fetch('https://ajogun-willon-sui-2.onrender.com/', {
-        method: 'GET',
-        mode: 'cors',
+      // Mock response instead of real fetch
+      const response = {
+        ok: true,
+        status: 200,
+        text: async () => 'Mock response - API calls disabled'
+      } as Response
         credentials: 'omit',
       })
       

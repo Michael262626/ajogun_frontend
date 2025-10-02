@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth-context"
 import { useWallet } from "@/lib/wallet-context"
 import { useApi } from "@/hooks/use-api"
+import { mockWills, mockWallet, formatAddress } from "@/lib/mock-data"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -138,8 +139,8 @@ const MainDashboard = () => {
       value: isLoadingBalance
         ? "Loading..."
         : errorMessage
-        ? "Error"
-        : `$${formatNumber(suiBalance * 2)}`,
+          ? "Error"
+          : `$${formatNumber(suiBalance * 2)}`,
       icon: DollarSign,
       change: isLoadingBalance ? "Fetching..." : errorMessage ? "Error" : "+12%",
       trend: isLoadingBalance || errorMessage ? "neutral" : "up",
@@ -218,15 +219,14 @@ const MainDashboard = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-border">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg flex items-center justify-center">
               <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
             </div>
             <span className="text-xl font-bold text-foreground">AjogunNet</span>
@@ -241,11 +241,10 @@ const MainDashboard = () => {
             <Link
               key={link.name}
               href={link.href}
-              className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                link.active
-                  ? "bg-primary text-primary-foreground shadow-lg"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
+              className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${link.active
+                ? "bg-primary text-primary-foreground shadow-lg"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
             >
               <link.icon className={`w-5 h-5 mr-3 ${link.active ? "text-primary-foreground" : ""}`} />
               {link.name}
@@ -452,13 +451,12 @@ const MainDashboard = () => {
                         </div>
                         <div className="flex items-center space-x-2">
                           <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              will.status.toLowerCase() === 'will created'
-                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                : will.status.toLowerCase() === 'active'
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${will.status.toLowerCase() === 'will created'
+                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                              : will.status.toLowerCase() === 'active'
                                 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
                                 : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-                            }`}
+                              }`}
                           >
                             {will.status.toLowerCase() === 'will created' ? 'Will Created' : will.status}
                           </span>

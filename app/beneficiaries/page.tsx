@@ -1,5 +1,5 @@
-import BeneficiaryManagement from "@/components/beneficiary-management"
+import BeneficiariesPage from "@/components/beneficiaries-page"
 
-export default function BeneficiariesPage() {
-  return <BeneficiaryManagement />
+export default function Beneficiaries() {
+  return <BeneficiariesPage />
 }

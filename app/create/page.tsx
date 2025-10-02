@@ -1,5 +1,5 @@
-import ModernWillCreation from "@/components/modern-will-creation"
+import ModernWillCreationNew from "@/components/modern-will-creation-new"
 
-export default function CreateWillPage() {
-  return <ModernWillCreation />
+export default function CreatePage() {
+  return <ModernWillCreationNew />
 }

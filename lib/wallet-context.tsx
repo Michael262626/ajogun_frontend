@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect, useCallback } from "react"
-import { apiService } from "@/lib/api-service"
+import { mockApiService as apiService } from "@/lib/mock-api-service"
 
 interface WalletContextType {
   isConnected: boolean
@@ -20,6 +20,7 @@ interface WalletContextType {
   refreshBalance: (userId?: string) => Promise<void>
   refreshBalanceFast: () => Promise<void>
   transferTokens: (recipientAddress: string, amount: string) => Promise<{ success: boolean; message?: string }>
+  setWalletFromCreation: (walletData: { address: string; balance?: string }, userId: string) => void
 
   userId: string | null
   password: string | null
@@ -277,6 +278,25 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("walletActivatedAt")
   }, [])
 
+  const setWalletFromCreation = useCallback((walletData: { address: string; balance?: string }, userId: string) => {
+    console.log("🎉 === NEW WALLET ACTIVATED ===")
+    console.log(`✅ User ID: ${userId}`)
+    console.log(`✅ Wallet Address: ${walletData.address}`)
+    console.log(`✅ Activation Time: ${new Date().toISOString()}`)
+    console.log("================================")
+
+    setAddress(walletData.address)
+    setUserId(userId)
+    setIsConnected(true)
+    setBalance(walletData.balance || "1247.89") // Set initial mock balance
+    
+    // Store in localStorage for persistence
+    localStorage.setItem("walletAddress", walletData.address)
+    localStorage.setItem("walletUserId", userId)
+    localStorage.setItem("walletActivatedAt", new Date().toISOString())
+    localStorage.setItem("ajogun-userId", userId)
+  }, [])
+
   return (
     <WalletContext.Provider
       value={{
@@ -295,6 +315,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         refreshBalance,
         refreshBalanceFast,
         transferTokens,
+        setWalletFromCreation,
         userId,
         password,
         isAuthenticated,

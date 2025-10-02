@@ -5,7 +5,7 @@
 
 import { corsProxyService } from './cors-proxy'
 
-const API_BASE_URL = 'http://localhost:3000'
+const API_BASE_URL = 'https://ajogun-willon-sui-2.onrender.com'
 
 // Development mode detection
 const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost'

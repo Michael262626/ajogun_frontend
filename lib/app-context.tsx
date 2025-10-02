@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
-import { apiService } from "@/lib/api-service"
+import { mockApiService as apiService } from "@/lib/mock-api-service"
 
 interface Will {
   id: string

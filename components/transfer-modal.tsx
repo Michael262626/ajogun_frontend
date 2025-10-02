@@ -30,7 +30,7 @@ const TransferModal = ({ isOpen, onClose, onSuccess }: TransferModalProps) => {
   const { userId, password, isAuthenticated } = useAuth()
   const { address, balance, refreshBalance } = useWallet()
   const { transferTokens, transferState } = useApi()
-  
+
   const [formData, setFormData] = useState({
     recipientAddress: "",
     amount: "",
@@ -71,7 +71,7 @@ const TransferModal = ({ isOpen, onClose, onSuccess }: TransferModalProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!isAuthenticated || !userId || !password) {
       setErrors({ general: "Please login first" })
       return
@@ -100,10 +100,10 @@ const TransferModal = ({ isOpen, onClose, onSuccess }: TransferModalProps) => {
         if (userId) {
           await refreshBalance(userId)
         }
-        
+
         onSuccess?.()
         onClose()
-        
+
         // Reset form
         setFormData({
           recipientAddress: "",

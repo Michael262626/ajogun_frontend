@@ -4,12 +4,17 @@
 
 import { useState, useCallback } from 'react'
 import { 
-  apiService, 
+  mockApiService as apiService, 
   type CreateWillRequest, 
   type WillResponse, 
-  type CreateWalletRequest,
-  type TransferRequest 
-} from '@/lib/api-service'
+  type CreateWalletRequest
+} from '@/lib/mock-api-service'
+
+interface TransferRequest {
+  password: string
+  recipientAddress: string
+  amount: number
+}
 import { useApp } from '@/lib/app-context'
 import { useWallet } from '@/lib/wallet-context'
 
