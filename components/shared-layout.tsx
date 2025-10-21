@@ -50,7 +50,7 @@ export default function SharedLayout({
   const isActive = (href: string) => pathname === href
 
   return (
-    <div className="h-screen bg-black text-white flex overflow-hidden">
+    <div className="h-screen  text-white flex overflow-hidden">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-6 right-6 z-50 bg-orange-500 text-black px-6 py-4 rounded-xl shadow-2xl animate-slide-in-right border border-orange-400">

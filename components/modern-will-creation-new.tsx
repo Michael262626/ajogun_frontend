@@ -135,7 +135,7 @@ export default function ModernWillCreationNew() {
 
   const headerAction = (
     <div className="flex items-center gap-4">
-      <div className="text-sm text-blue-300">
+      <div className="text-sm text-muted-foreground">
         Step {currentStep} of {steps.length}
       </div>
       <Button 
@@ -170,28 +170,28 @@ export default function ModernWillCreationNew() {
                     ? 'bg-orange-500/10 border border-orange-500/30' 
                     : isCompleted 
                       ? 'bg-green-500/10 border border-green-500/30'
-                      : 'bg-blue-900/30 border border-blue-800/30'
+                      : 'bg-muted border border-border'
                 }`}>
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                     isActive 
                       ? 'bg-orange-500 text-black' 
                       : isCompleted 
                         ? 'bg-green-500 text-white'
-                        : 'bg-blue-600 text-white'
+                        : 'bg-primary text-white'
                   }`}>
                     {isCompleted ? <CheckCircle className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                   </div>
                   <div>
                     <p className={`font-semibold ${
-                      isActive ? 'text-orange-400' : isCompleted ? 'text-green-400' : 'text-blue-300'
+                      isActive ? 'text-primary' : isCompleted ? 'text-green-500' : 'text-muted-foreground'
                     }`}>
                       {step.title}
                     </p>
-                    <p className="text-sm text-blue-300">{step.description}</p>
+                    <p className="text-sm text-muted-foreground">{step.description}</p>
                   </div>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className="w-12 h-0.5 bg-blue-800/30 mx-4"></div>
+                  <div className="w-12 h-0.5 bg-border mx-4"></div>
                 )}
               </div>
             )
@@ -201,67 +201,67 @@ export default function ModernWillCreationNew() {
 
       {/* Step Content */}
       {currentStep === 1 && (
-        <Card className="bg-gradient-to-br from-blue-950 to-black border border-blue-800/50">
+        <Card className="bg-card border border-border">
           <CardHeader>
-            <CardTitle className="text-white text-xl">Will Information</CardTitle>
-            <p className="text-blue-300">Provide basic details about your digital will</p>
+            <CardTitle className="text-foreground text-xl">Will Information</CardTitle>
+            <p className="text-muted-foreground">Provide basic details about your digital will</p>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-blue-300">Will Title *</Label>
+                <Label className="text-muted-foreground">Will Title *</Label>
                 <Input
                   value={willTitle}
                   onChange={(e) => setWillTitle(e.target.value)}
-                  className="bg-blue-900/20 border-blue-700 text-white"
+                  className="bg-input border-border text-foreground"
                   placeholder="e.g., Family Inheritance Will"
                 />
-                <p className="text-xs text-blue-400">Give your will a descriptive name</p>
+                <p className="text-xs text-muted-foreground">Give your will a descriptive name</p>
               </div>
               
               <div className="space-y-2">
-                <Label className="text-blue-300">Creator</Label>
+                <Label className="text-muted-foreground">Creator</Label>
                 <Input
                   value={address || "Not connected"}
                   disabled
-                  className="bg-blue-900/20 border-blue-700 text-gray-400 font-mono text-sm"
+                  className="bg-muted border-border text-muted-foreground font-mono text-sm"
                 />
-                <p className="text-xs text-blue-400">Your connected wallet address</p>
+                <p className="text-xs text-muted-foreground">Your connected wallet address</p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-blue-300">Description (Optional)</Label>
+              <Label className="text-muted-foreground">Description (Optional)</Label>
               <textarea
                 value={willDescription}
                 onChange={(e) => setWillDescription(e.target.value)}
-                className="w-full h-24 bg-blue-900/20 border border-blue-700 rounded-lg p-3 text-white placeholder:text-blue-400 resize-none"
+                className="w-full h-24 bg-input border border-border rounded-lg p-3 text-foreground placeholder:text-muted-foreground resize-none"
                 placeholder="Describe the purpose of this will and any special instructions..."
               />
-              <p className="text-xs text-blue-400">Additional context for beneficiaries</p>
+              <p className="text-xs text-muted-foreground">Additional context for beneficiaries</p>
             </div>
 
-            <div className="bg-black/30 rounded-xl p-4 border border-blue-800/30">
+            <div className="bg-muted rounded-xl p-4 border border-border">
               <div className="flex items-center gap-3 mb-3">
-                <Shield className="w-5 h-5 text-green-400" />
-                <h3 className="text-white font-semibold">Security Features</h3>
+                <Shield className="w-5 h-5 text-green-500" />
+                <h3 className="text-foreground font-semibold">Security Features</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="text-blue-300">Blockchain immutability</span>
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span className="text-muted-foreground">Blockchain immutability</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="text-blue-300">Smart contract automation</span>
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span className="text-muted-foreground">Smart contract automation</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="text-blue-300">Cryptographic security</span>
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span className="text-muted-foreground">Cryptographic security</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="text-blue-300">Decentralized execution</span>
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span className="text-muted-foreground">Decentralized execution</span>
                 </div>
               </div>
             </div>
@@ -270,16 +270,16 @@ export default function ModernWillCreationNew() {
       )}
 
       {currentStep === 2 && (
-        <Card className="bg-gradient-to-br from-blue-950 to-black border border-blue-800/50">
+        <Card className="bg-card border border-border">
           <CardHeader>
-            <CardTitle className="text-white text-xl">Add Beneficiaries</CardTitle>
+            <CardTitle className="text-foreground text-xl">Add Beneficiaries</CardTitle>
             <div className="flex items-center justify-between">
-              <p className="text-blue-300">Specify who will inherit your digital assets</p>
+              <p className="text-muted-foreground">Specify who will inherit your digital assets</p>
               <div className="text-right">
-                <div className={`text-2xl font-bold ${totalPercentage === 100 ? 'text-green-400' : 'text-orange-400'}`}>
+                <div className={`text-2xl font-bold ${totalPercentage === 100 ? 'text-green-500' : 'text-orange-500'}`}>
                   {totalPercentage}%
                 </div>
-                <div className="text-sm text-blue-300">Total Allocation</div>
+                <div className="text-sm text-muted-foreground">Total Allocation</div>
               </div>
             </div>
           </CardHeader>
@@ -361,9 +361,9 @@ export default function ModernWillCreationNew() {
       )}
 
       {currentStep === 3 && (
-        <Card className="bg-gradient-to-br from-blue-950 to-black border border-blue-800/50">
+        <Card className="bg-card border border-border">
           <CardHeader>
-            <CardTitle className="text-white text-xl">Assets & Duration</CardTitle>
+            <CardTitle className="text-foreground text-xl">Assets & Duration</CardTitle>
             <p className="text-blue-300">Set the assets and execution timeline for your will</p>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -501,9 +501,9 @@ export default function ModernWillCreationNew() {
       )}
 
       {currentStep === 4 && (
-        <Card className="bg-gradient-to-br from-blue-950 to-black border border-blue-800/50">
+        <Card className="bg-card border border-border">
           <CardHeader>
-            <CardTitle className="text-white text-xl">Review & Deploy</CardTitle>
+            <CardTitle className="text-foreground text-xl">Review & Deploy</CardTitle>
             <p className="text-blue-300">Review your will details before deployment</p>
           </CardHeader>
           <CardContent className="space-y-6">
