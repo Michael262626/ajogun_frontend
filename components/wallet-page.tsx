@@ -46,6 +46,8 @@ import {
   ArrowUp,
   ArrowDown
 } from "lucide-react"
+import { CryptoIcon } from "@/components/ui/crypto-icons"
+import TokenSelector from "@/components/ui/token-selector"
 
 export default function WalletPage() {
   const { address, balance } = useWallet()
@@ -293,8 +295,8 @@ export default function WalletPage() {
                     <div key={token.name} className="bg-muted rounded-xl p-4 border border-border">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-r from-primary to-secondary">
-                            <span className="text-white font-bold text-sm">{token.name.charAt(0)}</span>
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center">
+                            <CryptoIcon symbol={token.name} size={40} />
                           </div>
                           <div>
                             <p className="text-foreground font-semibold">{token.name}</p>
@@ -398,8 +400,8 @@ export default function WalletPage() {
                     <div key={coin.symbol} className="bg-muted rounded-xl p-4 border border-border">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-                            <span className="text-white font-bold">{coin.symbol.charAt(0)}</span>
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center">
+                            <CryptoIcon symbol={coin.symbol} size={48} />
                           </div>
                           <div>
                             <p className="text-foreground font-semibold text-lg">{coin.name}</p>
@@ -476,16 +478,10 @@ export default function WalletPage() {
               <CardContent className="space-y-4">
                 <div>
                   <Label className="text-muted-foreground">Select Token</Label>
-                  <select
+                  <TokenSelector
                     value={swapFromToken}
-                    onChange={(e) => setSwapFromToken(e.target.value)}
-                    className="w-full bg-primary/5 border border-primary/20 text-foreground rounded-lg p-3"
-                  >
-                    <option value="SUI">SUI</option>
-                    <option value="ETH">ETH</option>
-                    <option value="BTC">BTC</option>
-                    <option value="SOL">SOL</option>
-                  </select>
+                    onChange={setSwapFromToken}
+                  />
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Amount (USD)</Label>
@@ -526,16 +522,10 @@ export default function WalletPage() {
               <CardContent className="space-y-4">
                 <div>
                   <Label className="text-muted-foreground">Select Token</Label>
-                  <select
+                  <TokenSelector
                     value={swapFromToken}
-                    onChange={(e) => setSwapFromToken(e.target.value)}
-                    className="w-full bg-primary/5 border border-primary/20 text-foreground rounded-lg p-3"
-                  >
-                    <option value="SUI">SUI</option>
-                    <option value="ETH">ETH</option>
-                    <option value="BTC">BTC</option>
-                    <option value="SOL">SOL</option>
-                  </select>
+                    onChange={setSwapFromToken}
+                  />
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Amount ({swapFromToken})</Label>
@@ -582,17 +572,11 @@ export default function WalletPage() {
                 <div>
                   <Label className="text-muted-foreground">From</Label>
                   <div className="flex gap-2">
-                    <select
+                    <TokenSelector
                       value={swapFromToken}
-                      onChange={(e) => setSwapFromToken(e.target.value)}
-                      className="bg-primary/5 border border-primary/20 text-foreground rounded-lg p-3 w-32"
-                    >
-                      <option value="SUI">SUI</option>
-                      <option value="ETH">ETH</option>
-                      <option value="BTC">BTC</option>
-                      <option value="SOL">SOL</option>
-                      <option value="USDC">USDC</option>
-                    </select>
+                      onChange={setSwapFromToken}
+                      className="w-32"
+                    />
                     <Input
                       type="number"
                       value={swapAmount}
@@ -621,17 +605,11 @@ export default function WalletPage() {
                 <div>
                   <Label className="text-muted-foreground">To</Label>
                   <div className="flex gap-2">
-                    <select
+                    <TokenSelector
                       value={swapToToken}
-                      onChange={(e) => setSwapToToken(e.target.value)}
-                      className="bg-primary/5 border border-primary/20 text-foreground rounded-lg p-3 w-32"
-                    >
-                      <option value="USDC">USDC</option>
-                      <option value="SUI">SUI</option>
-                      <option value="ETH">ETH</option>
-                      <option value="BTC">BTC</option>
-                      <option value="SOL">SOL</option>
-                    </select>
+                      onChange={setSwapToToken}
+                      className="w-32"
+                    />
                     <Input
                       type="number"
                       value={swapAmount ? (parseFloat(swapAmount) * 2.45).toFixed(4) : ''}
@@ -689,17 +667,10 @@ export default function WalletPage() {
               </div>
               <div>
                 <Label className="text-muted-foreground">Token</Label>
-                <select
+                <TokenSelector
                   value={swapFromToken}
-                  onChange={(e) => setSwapFromToken(e.target.value)}
-                  className="w-full bg-primary/5 border border-primary/20 text-foreground rounded-lg p-3"
-                >
-                  <option value="SUI">SUI</option>
-                  <option value="ETH">ETH</option>
-                  <option value="BTC">BTC</option>
-                  <option value="SOL">SOL</option>
-                  <option value="USDC">USDC</option>
-                </select>
+                  onChange={setSwapFromToken}
+                />
               </div>
               <div>
                 <Label className="text-muted-foreground">Amount</Label>

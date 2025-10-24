@@ -35,6 +35,7 @@ import {
   Eye,
   Timer
 } from "lucide-react"
+import { CryptoIcon } from "@/components/ui/crypto-icons"
 
 interface Will {
   willIndex: number
@@ -257,7 +258,7 @@ export default function ModernDashboard() {
             <div className="grid grid-cols-3 gap-4 mt-4">
               {portfolioData.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                  <CryptoIcon symbol={item.name} size={16} />
                   <span className="text-sm text-muted-foreground">{item.name}</span>
                 </div>
               ))}

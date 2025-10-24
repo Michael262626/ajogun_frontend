@@ -3,18 +3,13 @@
  */
 
 import { useState, useCallback } from 'react'
-import { 
-  mockApiService as apiService, 
-  type CreateWillRequest, 
-  type WillResponse, 
-  type CreateWalletRequest
-} from '@/lib/mock-api-service'
-
-interface TransferRequest {
-  password: string
-  recipientAddress: string
-  amount: number
-}
+import {
+  unifiedApiService as apiService,
+  type CreateWillRequest,
+  type WillResponse,
+  type CreateWalletRequest,
+  type TransferRequest
+} from '@/lib/unified-api-service'
 import { useApp } from '@/lib/app-context'
 import { useWallet } from '@/lib/wallet-context'
 
@@ -116,7 +111,7 @@ export function useApi() {
           id: Date.now().toString(),
           type: 'success',
           title: 'Will Created Successfully',
-          message: result.willIndex 
+          message: result.willIndex
             ? `Your will has been deployed to the blockchain with index ${result.willIndex}`
             : 'Your will has been created successfully',
           timestamp: new Date().toISOString(),
@@ -162,9 +157,9 @@ export function useApi() {
       const wills = await apiService.getAllWillsForOwner(address)
       console.log("📋 Fetched wills:", wills)
       console.log(`📋 Found ${wills.length} wills for address ${address}`)
-      
+
       setWillsState({ data: wills, loading: false, error: null })
-      
+
       if (wills.length > 0) {
         console.log("📋 === WILLS SUMMARY ===")
         wills.forEach((will, index) => {
@@ -179,7 +174,7 @@ export function useApi() {
       } else {
         console.log("📋 No wills found for this address")
       }
-      
+
       return wills
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch wills'
@@ -194,7 +189,8 @@ export function useApi() {
     setTransferState({ data: null, loading: true, error: null })
 
     try {
-      const result = await apiService.transferTokens(transferData)
+      const { userId, ...transferPayload } = transferData
+      const result = await apiService.transferTokens(userId, transferPayload)
 
       setTransferState({ data: result, loading: false, error: null })
 

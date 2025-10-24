@@ -249,6 +249,36 @@ class MockApiService {
         }
       })
   }
+
+  async initiateWillExecution(willIndex: number, ownerAddress: string, executeData: any): Promise<any> {
+    await mockDelay(2000)
+    
+    return {
+      success: true,
+      message: "Will execution initiated successfully",
+      transactionHash: generateMockHash()
+    }
+  }
+
+  async executeWillAutomatically(ownerAddress: string, willIndex: number, executeData: any): Promise<any> {
+    await mockDelay(3000)
+    
+    const will = mockStorage.wills.find(w => w.willIndex === willIndex)
+    if (will) {
+      will.status = 'executed'
+    }
+    
+    return {
+      success: true,
+      message: "Will executed automatically",
+      transactionHash: generateMockHash(),
+      distributionDetails: will?.heirs.map((heir, index) => ({
+        recipient: heir,
+        amount: (will.totalValue! * (will.shares[index] / 100)).toFixed(2),
+        percentage: will.shares[index]
+      }))
+    }
+  }
 }
 
 export const mockApiService = new MockApiService()
