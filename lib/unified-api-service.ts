@@ -36,5 +36,12 @@ export type {
   CreateWalletResponse,
   CreateWillRequest,
   WillResponse,
-  TransferRequest
+  TransferRequest,
+  TransferTokensRequest,
+  VerifyAndActivateWalletRequest,
+  GetWalletRequest,
+  UpdateActivityRequest,
+  ExecuteWillRequest,
+  ExecuteWillAutomaticallyRequest,
+  RevokeWillRequest
 } from './api-service'

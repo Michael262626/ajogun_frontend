@@ -31,7 +31,7 @@ export const ENDPOINTS = {
     IMPORT: '/wallet/import',
     STATUS: (userId: string) => `/wallet/${userId}/status`,
   },
-  
+
   // Will endpoints
   WILL: {
     CREATE: '/will/create',

@@ -8,7 +8,13 @@ import {
   type CreateWillRequest,
   type WillResponse,
   type CreateWalletRequest,
-  type TransferRequest
+  type TransferRequest,
+  type TransferTokensRequest,
+  type VerifyAndActivateWalletRequest,
+  type GetWalletRequest,
+  type UpdateActivityRequest,
+  type ExecuteWillRequest,
+  type RevokeWillRequest
 } from '@/lib/unified-api-service'
 import { useApp } from '@/lib/app-context'
 import { useWallet } from '@/lib/wallet-context'
@@ -185,12 +191,16 @@ export function useApi() {
   }, [address])
 
   // Transfer Tokens
-  const transferTokens = useCallback(async (transferData: TransferRequest & { userId: string }) => {
+  const transferTokens = useCallback(async (transferData: { userId: string; recipient: string; amount: number; password: string }) => {
     setTransferState({ data: null, loading: true, error: null })
 
     try {
       const { userId, ...transferPayload } = transferData
-      const result = await apiService.transferTokens(userId, transferPayload)
+      const result = await apiService.transferTokens(userId, {
+        recipient: transferPayload.recipient,
+        amount: transferPayload.amount,
+        password: transferPayload.password
+      })
 
       setTransferState({ data: result, loading: false, error: null })
 
@@ -199,7 +209,7 @@ export function useApi() {
           id: Date.now().toString(),
           type: 'success',
           title: 'Transfer Successful',
-          message: `Tokens transferred successfully to ${transferData.recipientAddress}`,
+          message: `Tokens transferred successfully to ${transferData.recipient}`,
           timestamp: new Date().toISOString(),
         })
       } else {
@@ -365,9 +375,12 @@ export function useApi() {
   }, [addNotification])
 
   // Execute Will Automatically
-  const executeWillAutomatically = useCallback(async (ownerAddress: string, willIndex: number, password: string) => {
+  const executeWillAutomatically = useCallback(async (ownerAddress: string, willIndex: number, userId: string, password: string) => {
     try {
-      const result = await apiService.executeWillAutomatically(ownerAddress, willIndex, { password })
+      const result = await apiService.executeWillAutomatically(ownerAddress, willIndex, { 
+        userId,
+        password 
+      })
 
       if (result.success) {
         addNotification({
